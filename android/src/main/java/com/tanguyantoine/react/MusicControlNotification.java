@@ -7,8 +7,7 @@ import android.content.res.Resources;
 import android.os.IBinder;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v7.app.NotificationCompat;
-import android.support.v7.app.NotificationCompat.MediaStyle;
+import android.support.v4.app.NotificationCompat.Builder;
 import android.view.KeyEvent;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableMap;
@@ -26,7 +25,7 @@ public class MusicControlNotification {
 
     private int smallIcon;
     private int customIcon;
-    private NotificationCompat.Action play, pause, stop, next, previous, skipForward, skipBackward;
+    private android.support.v4.app.NotificationCompat.Action play, pause, stop, next, previous, skipForward, skipBackward;
 
     public MusicControlNotification(MusicControlModule module, ReactApplicationContext context) {
         this.context = context;
@@ -39,13 +38,13 @@ public class MusicControlNotification {
         smallIcon = r.getIdentifier("music_control_icon", "drawable", packageName);
         if(smallIcon == 0) smallIcon = r.getIdentifier("play", "drawable", packageName);
     }
-    
+
     public synchronized void setCustomNotificationIcon(String resourceName) {
         if(resourceName == null) {
             customIcon = 0;
             return;
         }
-        
+
         Resources r = context.getResources();
         String packageName = context.getPackageName();
 
@@ -68,11 +67,11 @@ public class MusicControlNotification {
         if (options != null && options.containsKey("skipBackward") && (options.get("skipBackward") == 10 || options.get("skipBackward") == 5 || options.get("skipBackward") == 30)) {
             skipBackward = createAction("skip_backward_" + options.get("skipBackward").toString(), "Skip Backward", mask, PlaybackStateCompat.ACTION_REWIND, skipBackward);
         } else {
-            skipBackward = createAction("skip_backward_", "Skip Backward", mask, PlaybackStateCompat.ACTION_REWIND, skipBackward);
+            skipBackward = createAction("skip_backward_10", "Skip Backward", mask, PlaybackStateCompat.ACTION_REWIND, skipBackward);
         }
     }
 
-    public synchronized void show(NotificationCompat.Builder builder, boolean isPlaying) {
+    public synchronized void show(android.support.v4.app.NotificationCompat.Builder builder, boolean isPlaying) {
         // Add the buttons
         builder.mActions.clear();
         if(previous != null) builder.addAction(previous);
@@ -89,9 +88,9 @@ public class MusicControlNotification {
         } else if(module.notificationClose == MusicControlModule.NotificationClose.PAUSED) {
             builder.setOngoing(isPlaying);
         } else { // NotificationClose.NEVER
-            builder.setOngoing(true); 
+            builder.setOngoing(true);
         }
-        
+
         builder.setSmallIcon(customIcon != 0 ? customIcon : smallIcon);
 
         // Show actions in compact view of notificationShowActionsInCompactView
@@ -142,7 +141,7 @@ public class MusicControlNotification {
         return KeyEvent.KEYCODE_UNKNOWN;
     }
 
-    private NotificationCompat.Action createAction(String iconName, String title, long mask, long action, NotificationCompat.Action oldAction) {
+    private android.support.v4.app.NotificationCompat.Action createAction(String iconName, String title, long mask, long action, android.support.v4.app.NotificationCompat.Action oldAction) {
         if((mask & action) == 0) return null; // When this action is not enabled, return null
         if(oldAction != null) return oldAction; // If this action was already created, we won't create another instance
 
@@ -158,7 +157,7 @@ public class MusicControlNotification {
         intent.putExtra(PACKAGE_NAME, packageName);
         PendingIntent i = PendingIntent.getBroadcast(context, keyCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        return new NotificationCompat.Action(icon, title, i);
+        return new android.support.v4.app.NotificationCompat.Action(icon, title, i);
     }
 
     public static class NotificationService extends Service {
